@@ -1,0 +1,106 @@
+"VIMRC"
+"Created by DavidXu_JJ"
+set fileencodings=utf-8,ucs-bom,gb18030,gbk,gb2312,cp936
+set termencoding=utf-8
+set encoding=utf-8
+autocmd BufWritePost $MYVIMRC source $MYVIMRC
+set nu
+set tabstop=4
+syntax on
+set shiftwidth=4
+set cin
+set mouse=a
+set ruler
+set cursorline
+set cursorcolumn
+set cindent
+set autoindent
+set relativenumber
+let g:rainbow_active=1
+set backspace=2
+set foldmethod=indent
+set foldlevelstart=99
+"read !pbpaste
+"write !pbcopy
+
+inoremap ' ''<ESC>i
+inoremap " ""<ESC>i
+inoremap ( ()<ESC>i
+inoremap [ []<ESC>i
+inoremap { {<CR>}<ESC>O
+inoremap } {}<ESC>i
+inoremap , ,<Space><ESC>a
+" inoremap = <Space>=<Space><ESC>a
+" inoremap : :<Space><ESC>a
+" inoremap + <Space>+<Space><ESC>a
+" inoremap - <Space>-<Space><ESC>a
+" inoremap * <Space>*<Space><ESC>a
+" inoremap / <Space>/<Space><ESC>a
+" inoremap % <Space>%<Space><ESC>a
+
+"设置跳出自动补全的括号
+func SkipPair()
+    if getline('.')[col('.') - 1] == ')' || getline('.')[col('.') - 1] == ']' || getline('.')[col('.') - 1] == '"' || getline('.')[col('.') - 1] == "'" || getline('.')[col('.') - 1] == '}'|| getline('.')[col('.') - 1] == '='|| getline('.')[col('.') - 1] == ';' || getline('.')[col('.') - 1] == ')'|| getline('.')[col('.') - 1] == '>'
+
+        return "\<ESC>la"
+    else
+        return "\t"
+    endif
+endfunc
+" 将tab键绑定为跳出括号
+inoremap <TAB> <c-r>=SkipPair()<CR>
+
+func DeleteBoth()
+	if (getline('.')[col('.') - 2] == '(' && getline('.')[col('.') - 1] == ')')||(getline('.')[col('.') - 2] == '[' && getline('.')[col('.') - 1] == ']') || (getline('.')[col('.') - 2] == '"' && getline('.')[col('.') - 1] == '"') ||(getline('.')[col('.') - 2] == "'" && getline('.')[col('.') - 1] == "'") || (getline('.')[col('.') - 2] == '{' && getline('.')[col('.') - 1] == '}') || (getline('.')[col('.') - 2] == '<' && getline('.')[col('.') - 1] == '>') 
+
+		return "\<ESC>2s" 
+	else
+		return "\<BS>"
+	endif
+endfunc
+inoremap <BS> <c-r>=DeleteBoth()<CR>
+
+
+"把":g/^\s*\$/d"这个命令换成":DBL"这个容易被(Delete Blank Lines)
+"记住的命令,这个命令的作用是删除文档中所有空白行
+":command -nargs=0 DBL g/^\s*$/d
+:command -range=% DBL :<line1>,<line2>g/^\s*$/d
+
+"以下命令将文中所有的字符串idiots替换成managers：
+":1,$s/idiots/manages/g
+"通常我们会在命令中使用%指代整个文件做为替换范围：
+":%s/search/replace/g
+"以下命令指定只在第5至第15行间进行替换:
+":5,15s/dog/cat/g
+"以下命令指定只在当前行至文件结尾间进行替换:
+":.,$s/dog/cat/g
+"以下命令指定只在后续9行内进行替换:
+":.,.+8s/dog/cat/g
+
+
+map <F5> :call CompileRunGcc()<CR>
+func! CompileRunGcc()
+	exec "w"
+	if &filetype == 'c'
+		exec "!g++ % -o %<"
+		exec "!time ./%<"
+	elseif &filetype == 'cpp'
+		exec "!g++ % -o %<"
+		exec "!time ./%<"
+	elseif &filetype == 'java'
+		exec "!javac %"
+		exec "!time java %<"
+	elseif &filetype == 'sh'
+		:!time bash %
+	elseif &filetype == 'python'
+		exec "!time python3 %"
+    elseif &filetype == 'html'
+        exec "!firefox % &"
+    elseif &filetype == 'go'
+        exec "!go build %<"
+        exec "!time go run %"
+    elseif &filetype == 'mkd'
+        exec "!~/.vim/markdown.pl % > %.html &"
+        exec "!firefox %.html &"
+	endif
+endfunc
